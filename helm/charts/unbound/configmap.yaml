@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unbound-a-records-conf
+data:
+  a-records.conf: |
+    server:
+      private-domain: "plex.direct"
+

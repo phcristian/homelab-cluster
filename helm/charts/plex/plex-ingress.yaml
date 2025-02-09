@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plex-media-server-ingress
+  labels:
+    name: plex-media-server-ingress
+    app: plex-media-server
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex-media-server
+    app.kubernetes.io/version: "1.41.3"
+spec:
+  ingressClassName: nginx-internal
+  rules:
+  - host: plexms.home
+    http:
+      paths:
+      - path: '/'
+        pathType: Prefix
+        backend:
+          service:
+            name: plex-media-server
+            port:
+              number: 32400
+  tls:
+  - hosts:
+    - plex.home
+    secretName: plex-media-server-ingress-lets-encrypt

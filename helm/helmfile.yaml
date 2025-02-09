@@ -1,0 +1,58 @@
+repositories:
+  - name: longhorn
+    url: https://charts.longhorn.io
+  - name: metallb
+    url: https://metallb.github.io/metallb
+  - name: mojo2600
+    url: https://mojo2600.github.io/pihole-kubernetes/
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+---
+releases:
+  # Distributed storage
+  - name: longhorn
+    namespace: longhorn-system
+    chart: longhorn/longhorn
+    version: 1.8.0
+
+  # Load balancer
+  - name: metallb
+    chart: metallb/metallb
+    namespace: metallb-system
+    version: 0.14.9
+
+  # pihole
+  - name: pihole
+    namespace: pihole-system
+    chart: mojo2600/pihole
+    version: 2.27.0
+    values:
+      - ./values/pihole.values.yaml
+
+  # Unbound
+  - name: unbound
+    namespace: pihole-system
+    chart: ./charts/unbound
+
+  # Ingress for local network
+  - name: ingress-nginx-internal
+    namespace: nginx-system
+    chart: ingress-nginx/ingress-nginx
+    version: 4.12.0
+    values:
+      - ./values/nginx-internal.values.yaml
+
+  # plex-media-server
+  - name: plex-media-server
+    namespace: plex-system
+    chart: ./charts/plex
+
+ # Automatic DNS for pihole
+ # - name: externaldns-pihole
+ #   namespace: pihole-system
+ #   chart: bitnami/external-dns
+ #   version: 8.0.1
+ #   values:
+ #     - ./values/externaldns.values.yaml

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unbound
+  labels:
+    app: unbound
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unbound
+  template:
+    metadata:
+      labels:
+        app: unbound
+    spec:
+      containers:
+      - name: unbound
+        image: docker.io/mvance/unbound:1.22.0
+        ports:
+        - name: svc-53-udp
+          containerPort: 53
+          protocol: UDP
+        - name: svc-53-tcp
+          containerPort: 53
+          protocol: TCP
+        resources:
+          limits:
+            memory: "300Mi"
+            cpu: "250m"
+          requests:
+            memory: "50Mi"
+            cpu: "100m"
+        volumeMounts:
+          - name: unbound-a-conf-volume
+            mountPath: /opt/unbound/etc/unbound/a-records.conf
+            subPath: a-records.conf
+      volumes:
+        - name: unbound-a-conf-volume
+          configMap:
+            name: unbound-a-records-conf
