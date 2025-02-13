@@ -9,6 +9,8 @@ repositories:
     url: https://kubernetes.github.io/ingress-nginx
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
+  - name: homepage
+    url: https://jameswynn.github.io/helm-charts
 ---
 releases:
   # Distributed storage
@@ -34,7 +36,7 @@ releases:
   # Unbound
   - name: unbound
     namespace: pihole-system
-    chart: ./charts/unbound
+    chart: ./manifests/unbound
 
   # Ingress for local network
   - name: ingress-nginx-internal
@@ -44,15 +46,22 @@ releases:
     values:
       - ./values/nginx-internal.values.yaml
 
-  # plex-media-server
-  - name: plex-media-server
-    namespace: plex-system
-    chart: ./charts/plex
+  # media-server
+  - name: media-server
+    namespace: mediaserver-system
+    #chart: ./manifests/mediaserver
+    chart: ./charts/media-server
+    version: 1.0.0
 
  # Automatic DNS for pihole
- # - name: externaldns-pihole
- #   namespace: pihole-system
- #   chart: bitnami/external-dns
- #   version: 8.0.1
- #   values:
- #     - ./values/externaldns.values.yaml
+  - name: externaldns-pihole
+    namespace: pihole-system
+    chart: bitnami/external-dns
+    version: 8.0.1
+    values:
+      - ./values/externaldns.values.yaml
+ 
+  # Dashboard
+  - name: homepage
+    namespace: homepage-system
+    chart: ./manifests/homepage

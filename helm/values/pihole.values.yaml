@@ -1,4 +1,5 @@
 ---
+replicaCount: 1
 DNS1:
   10.43.0.20
 DNS2:
@@ -9,7 +10,15 @@ ingress:
   enabled: true
   hosts:
     - "pihole.home"
+  path: "/admin"
+  pathType: Prefix
   ingressClassName: nginx-internal
+  annotations:
+    gethomepage.dev/description: Dynamically Detected Pihole
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Cluster Management
+    gethomepage.dev/icon: pihole.png
+    gethomepage.dev/name: Pihole
 serviceWeb:
   loadBalancerIP: 10.23.1.250
   annotations:
@@ -20,6 +29,5 @@ serviceDns:
   annotations:
     metallb.universe.tf/allow-shared-ip: pihole-svc
   type: LoadBalancer
-replicaCount: 1
 serviceDhcp:
   enabled: false

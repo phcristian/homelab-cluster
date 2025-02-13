@@ -1,0 +1,66 @@
+global:
+  host: media.home
+  puid: 5313
+  pgid: 5313
+  ingressClassName: nginx-internal
+
+plex:
+  ingress:
+    suffix: plex
+    annotations: 
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Media
+      gethomepage.dev/icon: plex.png
+      gethomepage.dev/name: Plex
+    tls:
+      secretName: ""
+  loadBalancerIP: 10.23.1.249
+
+sonarr:
+  ingress:
+    suffix: sonarr
+    annotations: 
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Media
+      gethomepage.dev/icon: sonarr.png
+      gethomepage.dev/name: Sonarr
+    tls:
+      secretName: ""
+  loadBalancerIP: ""
+
+radarr:
+  ingress:
+    suffix: radarr
+    annotations: 
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Media
+      gethomepage.dev/icon: radarr.png
+      gethomepage.dev/name: Radarr
+    tls:
+      secretName: ""
+  loadBalancerIP: ""
+
+prowlarr:
+  ingress:
+    suffix: prowlarr
+    annotations: 
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Media
+      gethomepage.dev/icon: prowlarr.png
+      gethomepage.dev/name: Prowlarr
+    tls:
+      secretName: ""
+  loadBalancerIP: ""
+
+transmission:
+  ingress:
+    suffix: transmission
+    annotations: 
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Media
+      gethomepage.dev/icon: transmission.png
+      gethomepage.dev/name: Transmission
+    tls:
+      secretName: ""
+  loadBalancerIP: ""
+

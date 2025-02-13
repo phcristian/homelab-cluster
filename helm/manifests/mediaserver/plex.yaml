@@ -1,3 +1,5 @@
+---
+### StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -5,11 +7,8 @@ metadata:
   labels:
     name: plex-media-server
     app: plex-media-server
-    helm.sh/chart: plex-media-server-0.8.0
     app.kubernetes.io/name: plex-media-server
     app.kubernetes.io/instance: plex-media-server
-    app.kubernetes.io/version: "1.41.3"
-    app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: plex-media-server
   selector:
@@ -20,21 +19,10 @@ spec:
     metadata:
       labels:
         app: plex-media-server
-        helm.sh/chart: plex-media-server-0.8.0
         app.kubernetes.io/name: plex-media-server
         app.kubernetes.io/instance: plex-media-server
-        app.kubernetes.io/version: "1.41.3"
-        app.kubernetes.io/managed-by: Helm
-      annotations:
-        {}
     spec:
       serviceAccountName: plex-media-server
-      tolerations:
-        []
-      nodeSelector:
-        {}
-      affinity:
-        {}
       volumes:
       - name: pms-transcode
         emptyDir: {}
@@ -62,6 +50,9 @@ spec:
       - name: plex-media-server-pms
         image: index.docker.io/plexinc/pms-docker:latest
         imagePullPolicy: IfNotPresent
+        env:
+          - name: ADVERTISE_IP
+            value: http://10.23.1.249:32400, https://plex.home
         ports:
         - containerPort: 32400
           name: plex
@@ -84,9 +75,6 @@ spec:
         - containerPort: 32414
           name: plex-gdm-4
           protocol: UDP          
-        env:
-        - name: ADVERTISE_IP
-          value: http://10.23.1.249:32400, https://plex.home
         volumeMounts:
         - name: pms-config
           mountPath: /config
@@ -118,4 +106,107 @@ spec:
       resources:
         requests:
           storage: 10Gi
+---
+### Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: plex-media-server-lb
+  labels:
+    app: plex-media-server
+    app.kubernetes.io/name: plex-media-server-lb
+    app.kubernetes.io/instance: plex-media-server-lb
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.23.1.249 
+  ports:
+  - port: 32400
+    targetPort: plex
+    name: plex
+  - port: 8324
+    targetPort: plex-roku
+    name: plex-roku
+  - port: 32469
+    targetPort: plex-dlna
+    name: plex-dlna
+  - port: 1900
+    targetPort: plex-upnp
+    name: plex-upnp
+    protocol: UDP
+  - port: 32410
+    targetPort: plex-gdm-1
+    name: plex-gdm-1
+    protocol: UDP
+  - port: 32412
+    targetPort: plex-gdm-2
+    name: plex-gdm-2
+    protocol: UDP
+  - port: 32413
+    targetPort: plex-gdm-3
+    name: plex-gdm-3
+    protocol: UDP
+  - port: 32414
+    targetPort: plex-gdm-4
+    name: plex-gdm-4
+    protocol: UDP
+  selector:
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex-media-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plex-media-server
+  labels:
+    app: plex-media-server
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex-media-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 32400
+      targetPort: plex
+      name: plex
+  selector:
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex-media-server
+---
+### ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: plex-media-server
+  labels:
+    app: plex-media-server
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex-media-server
+automountServiceAccountToken: false
+---
+### Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plex-media-server-ingress
+  labels:
+    name: plex-media-server-ingress
+    app: plex-media-server
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex-media-server
+spec:
+  ingressClassName: nginx-internal
+  rules:
+  - host: plex.home
+    http:
+      paths:
+      - path: '/'
+        pathType: Prefix
+        backend:
+          service:
+            name: plex-media-server
+            port:
+              number: 32400
+  tls:
+  - hosts:
+    - plex.home
+    secretName: plex-media-server-ingress-lets-encrypt
 
