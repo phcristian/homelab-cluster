@@ -10,14 +10,12 @@ spec:
   serviceName: plex-media-server
   selector:
     matchLabels:
-      app.kubernetes.io/name: plex-media-server
-      app.kubernetes.io/instance: plex-media-server
+      {{- include "media-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
         app: plex-media-server
-        app.kubernetes.io/name: plex-media-server
-        app.kubernetes.io/instance: plex-media-server
+        {{- include "media-server.selectorLabels" . | nindent 8}}
     spec:
       serviceAccountName: plex-media-server
       volumes:
@@ -129,8 +127,7 @@ metadata:
   name: plex-media-server-lb
   labels:
     app: plex-media-server
-    app.kubernetes.io/name: plex-media-server-lb
-    app.kubernetes.io/instance: plex-media-server-lb
+    {{- include "media-server.labels" . | nindent 4 }}
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ .Values.plex.loadBalancerIP }} 
@@ -165,8 +162,7 @@ spec:
     name: plex-gdm-4
     protocol: UDP
   selector:
-    app.kubernetes.io/name: plex-media-server
-    app.kubernetes.io/instance: plex-media-server
+    app: plex-media-server
 ---
 apiVersion: v1
 kind: Service
@@ -174,8 +170,7 @@ metadata:
   name: plex-media-server
   labels:
     app: plex-media-server
-    app.kubernetes.io/name: plex-media-server
-    app.kubernetes.io/instance: plex-media-server
+    {{- include "media-server.labels" . | nindent 4}}
 spec:
   type: ClusterIP
   ports:
@@ -183,8 +178,7 @@ spec:
       targetPort: plex
       name: plex
   selector:
-    app.kubernetes.io/name: plex-media-server
-    app.kubernetes.io/instance: plex-media-server
+    app: plex-media-server
 ---
 ### ServiceAccount
 apiVersion: v1
@@ -193,8 +187,7 @@ metadata:
   name: plex-media-server
   labels:
     app: plex-media-server
-    app.kubernetes.io/name: plex-media-server
-    app.kubernetes.io/instance: plex-media-server
+    {{- include "media-server.labels" . | nindent 4 }}
 automountServiceAccountToken: false
 ---
 ### Ingress
@@ -203,10 +196,8 @@ kind: Ingress
 metadata:
   name: plex-media-server-ingress
   labels:
-    name: plex-media-server-ingress
     app: plex-media-server
-    app.kubernetes.io/name: plex-media-server
-    app.kubernetes.io/instance: plex-media-server
+    {{- include "media-server.labels" . | nindent 4}}
   {{- with .Values.plex.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
