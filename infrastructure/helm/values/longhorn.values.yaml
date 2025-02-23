@@ -1,0 +1,8 @@
+ingress:
+  enabled: true
+  ingressClassName: nginx-internal
+  host: longhorn.phcristian.net
+  path: /
+  pathType: Prefix
+  tlsSecret: longhorn-certificate-secret
+  tls: true

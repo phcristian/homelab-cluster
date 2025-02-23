@@ -21,24 +21,16 @@ spec:
       volumes:
       - name: pms-transcode
         emptyDir: {}
+      - name: config-volume
+        persistentVolumeClaim:
+          claimName: config-pvc
       - name: dev-dri
         hostPath:
           path: /dev/dri
-      - name: vol2
+      - name: media-volume
         hostPath:
-          path: /mnt/vol2
-      - name: vol3
-        hostPath:
-          path: /mnt/vol3
-      - name: vol4
-        hostPath:
-          path: /mnt/vol4
-      - name: vol5
-        hostPath:
-          path: /mnt/vol5
-      - name: vol6
-        hostPath:
-          path: /mnt/vol6
+          path: /mnt/media
+          type: Directory
       terminationGracePeriodSeconds: 120
       initContainers:
       containers:
@@ -89,36 +81,16 @@ spec:
           name: plex-gdm-4
           protocol: UDP          
         volumeMounts:
-        - name: pms-config
+        - name: config-volume
           mountPath: /config
+          subPath: config/plex
         - name: pms-transcode
           mountPath: /transcode
         - name: dev-dri
           mountPath: /dev/dri
           readOnly: true
-        - name: vol2
-          mountPath: /Drive1
-          readOnly: true
-        - name: vol3
-          mountPath: /Drive2
-          readOnly: true
-        - name: vol4
-          mountPath: /Drive3
-          readOnly: true
-        - name: vol5
-          mountPath: /Drive4
-          readOnly: true         
-        - name: vol6
-          mountPath: /Drive5
-          readOnly: true
-  volumeClaimTemplates:
-  - metadata:
-      name: pms-config
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 10Gi
+        - name: media-volume
+          mountPath: /media/movies
 ---
 ### Service
 apiVersion: v1

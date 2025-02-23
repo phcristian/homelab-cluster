@@ -1,0 +1,18 @@
+repositories:
+- name: homepage
+    url: https://jameswynn.github.io/helm-charts
+---
+releases:
+  # Dashboard
+  - name: homepage
+    namespace: homepage-system
+    chart: ./manifests/homepage
+
+  # media-server
+  - name: media-server
+    namespace: mediaserver-system
+    #chart: ./manifests/mediaserver
+    chart: ./charts/media-server
+    version: 1.0.0
+
+
