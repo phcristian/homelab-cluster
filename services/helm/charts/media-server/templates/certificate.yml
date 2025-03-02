@@ -1,0 +1,51 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: 
+  name: plex-ingress-certificate
+spec:
+  secretName: {{ .Values.plex.ingress.tls.secretName }}
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.plex.ingress.suffix }}.{{ .Values.global.host }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: 
+  name: sonarr-ingress-certificate
+spec:
+  secretName: {{ .Values.sonarr.ingress.tls.secretName }}
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.sonarr.ingress.suffix }}.{{ .Values.global.host }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: 
+  name: radarr-ingress-certificate
+spec:
+  secretName: {{ .Values.radarr.ingress.tls.secretName }}
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.radarr.ingress.suffix }}.{{ .Values.global.host }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: 
+  name: prowlarr-ingress-certificate
+spec:
+  secretName: {{ .Values.prowlarr.ingress.tls.secretName }}
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.prowlarr.ingress.suffix }}.{{ .Values.global.host }}
+---
+
+

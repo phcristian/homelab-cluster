@@ -12,7 +12,7 @@ ingress:
     - pihole.phcristian.net
   path: "/admin"
   pathType: Prefix
-  ingressClassName: nginx-internal
+  ingressClassName: traefik-internal
   tls:
     - secretName: pihole-certificate-secret
       hosts:

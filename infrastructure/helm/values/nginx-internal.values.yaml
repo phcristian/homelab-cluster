@@ -1,4 +1,5 @@
 controller:
+  enableAnnotationValidations: false
   ingressClassResource:
     # -- Name of the ingressClass
     name: nginx-internal
@@ -15,3 +16,6 @@ controller:
   # -- For backwards compatibility with ingress.class annotation, use ingressClass.
   # Algorithm is as follows, first ingressClassName is considered, if not present, controller looks for ingress.class annotation
   ingressClass: nginx-internal
+  allowSnippetAnnotations: true
+  admissionWebhooks:
+    enabled: false

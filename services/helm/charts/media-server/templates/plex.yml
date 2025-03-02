@@ -18,24 +18,11 @@ spec:
         {{- include "media-server.selectorLabels" . | nindent 8}}
     spec:
       serviceAccountName: plex-media-server
-      volumes:
-      - name: pms-transcode
-        emptyDir: {}
-      - name: config-volume
-        persistentVolumeClaim:
-          claimName: config-pvc
-      - name: dev-dri
-        hostPath:
-          path: /dev/dri
-      - name: media-volume
-        hostPath:
-          path: /mnt/media
-          type: Directory
       terminationGracePeriodSeconds: 120
       initContainers:
       containers:
-      - name: plex-media-server-pms
-        image: index.docker.io/plexinc/pms-docker:latest
+      - name: {{ .Chart.Name }}
+        image: docker.io/plexinc/pms-docker:latest
         imagePullPolicy: IfNotPresent
         readinessProbe:
           httpGet:
@@ -58,6 +45,10 @@ spec:
             value: "{{ .Values.global.pgid }}"
           - name: PUID
             value: "{{ .Values.global.puid }}"
+          {{- if .Values.plex.claim }}
+          - name: PLEX_CLAIM
+            value: {{ .Values.plex.claim }}
+          {{- end }}
         ports:
         - containerPort: 32400
           name: plex
@@ -89,8 +80,35 @@ spec:
         - name: dev-dri
           mountPath: /dev/dri
           readOnly: true
-        - name: media-volume
-          mountPath: /media/movies
+        - name: media-volume-2
+          mountPath: /data/vol2
+        - name: media-volume-3
+          mountPath: /data/vol3
+        - name: media-volume-4
+          mountPath: /data/vol4
+        - name: media-volume-5
+          mountPath: /data/vol5
+      volumes:
+      - name: pms-transcode
+        emptyDir: {}
+      - name: config-volume
+        persistentVolumeClaim:
+          claimName: config-pvc
+      - name: dev-dri
+        hostPath:
+          path: /dev/dri
+      - name: media-volume-2
+        hostPath:
+          path: /mnt/syno/vol2
+      - name: media-volume-3
+        hostPath:
+          path: /mnt/syno/vol3
+      - name: media-volume-4
+        hostPath:
+          path: /mnt/syno/vol4
+      - name: media-volume-5
+        hostPath:
+          path: /mnt/syno/vol5
 ---
 ### Service
 apiVersion: v1
@@ -187,7 +205,22 @@ spec:
             name: plex-media-server
             port:
               number: 32400
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: plex-media-server-ingress-route
+  labels:
+    app: plex-media-server
+    {{- include "media-server.labels" . | nindent 4}}
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`{{ .Values.plex.ingress.suffix }}.{{ .Values.global.host }}`)
+    kind: Rule
+    services:
+    - name: plex-media-server
+      port: 32400
   tls:
-    - hosts:
-        - {{ .Values.plex.ingress.suffix }}.{{ .Values.global.host }}
-      secretName: {{ .Values.plex.ingress.tls.secretName }}
+    secretName: {{ .Values.plex.ingress.tls.secretName }}

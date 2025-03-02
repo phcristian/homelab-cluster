@@ -1,0 +1,12 @@
+ingressClass:
+  name: traefik-internal
+ports:
+  web:
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+ingressRoute:
+  dashboard:
+    enabled: false
+    entryPoints: ["websecure"]

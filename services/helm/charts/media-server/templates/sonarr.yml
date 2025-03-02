@@ -1,0 +1,154 @@
+---
+### Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+  labels:
+    {{- include "media-server.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "media-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: sonarr
+        {{- include "media-server.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          runAsUser: {{ .Values.global.puid }}
+          runAsGroup: {{ .Values.global.pgid }}
+          fsGroup: {{ .Values.global.pgid }}
+        env:
+          - name: PGID
+            value: "{{ .Values.global.pgid }}"
+          - name: PUID
+            value: "{{ .Values.global.puid }}"
+        image: docker.io/linuxserver/sonarr
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: "/ping"
+            port: 8989
+          initialDelaySeconds: 10
+          periodSeconds: 20
+          timeoutSeconds: 20
+        ports:
+          - name: sonarr
+            containerPort: 8989
+            protocol: TCP
+        volumeMounts:
+          - name: config-volume
+            mountPath: /config
+            subPath: config/sonarr
+          - name: media-volume-2
+            mountPath: /data/vol2
+            subPath: TVShows
+          - name: media-volume-3
+            mountPath: /data/vol3
+            subPath: TVShows
+          - name: media-volume-4
+            mountPath: /data/vol4
+            subPath: TVShows
+          - name: media-volume-5
+            mountPath: /data/vol5
+            subPath: TVShows
+          - name: media-volume-6
+            mountPath: /downloads
+            subPath: TVShows
+      volumes:
+        - name: config-volume
+          persistentVolumeClaim:
+            claimName: config-pvc
+        - name: media-volume-2
+          hostPath:
+            path: /mnt/syno/vol2
+        - name: media-volume-3
+          hostPath:
+            path: /mnt/syno/vol3
+        - name: media-volume-4
+          hostPath:
+            path: /mnt/syno/vol4
+        - name: media-volume-5
+          hostPath:
+            path: /mnt/syno/vol5
+        - name: media-volume-6
+          hostPath:
+            path: /mnt/syno/vol6
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "kubernetes.io/hostname"
+        whenUnsatisfiable: "ScheduleAnyway"
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: {{ .Chart.Name }}
+---
+### Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr
+  labels:
+    {{- include "media-server.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8989
+      targetPort: 8989
+      protocol: TCP
+      name: sonarr
+  selector:
+    app: sonarr
+---
+### Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarr
+  labels:
+    {{- include "media-server.labels" . | nindent 4 }}
+  {{- with .Values.sonarr.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.global.ingressClassName }}
+  rules:
+  - host: {{ .Values.sonarr.ingress.suffix }}.{{ .Values.global.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 8989
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sonarr
+  labels:
+    app: sonarr
+    {{- include "media-server.labels" . | nindent 4}}
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`{{ .Values.sonarr.ingress.suffix }}.{{ .Values.global.host }}`)
+    kind: Rule
+    services:
+    - name: sonarr
+      port: 8989
+  tls:
+    secretName: {{ .Values.sonarr.ingress.tls.secretName }}
+
+
+

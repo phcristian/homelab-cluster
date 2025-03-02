@@ -5,18 +5,16 @@ repositories:
     url: https://metallb.github.io/metallb
   - name: mojo2600
     url: https://mojo2600.github.io/pihole-kubernetes/
-  - name: ingress-nginx
-    url: https://kubernetes.github.io/ingress-nginx
   - name: jetstack
     url: https://charts.jetstack.io
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: csi-driver-nfs
+    url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
 ---
 releases:
-  # Certificates
-  #- name: certificates
-  #  chart: ./manifests/certmanager
-
   # Distributed storage
   - name: longhorn
     namespace: longhorn-system
@@ -52,13 +50,13 @@ releases:
     namespace: pihole-system
     chart: ./manifests/unbound
 
-  # Ingress for local network
-  - name: ingress-nginx-internal
-    namespace: nginx-system
-    chart: ingress-nginx/ingress-nginx
-    version: 4.12.0
+# Ingress for local network
+  - name: traefik
+    namespace: traefik-system
+    chart: traefik/traefik
+    version: 34.4.0
     values:
-      - ./values/nginx-internal.values.yaml
+      - ./values/traefik.values.yaml
 
   # Cert Manager
   - name: cert-manager
@@ -67,4 +65,9 @@ releases:
     version: 1.17.0
     values:
       - ./values/cert-manager.values.yaml
-      - ./manifests/certmanager/cluster-issuer.yaml  
+
+  # CSI NFS Driver
+  - name: csi-driver
+    namespace: csi-driver
+    chart: csi-driver-nfs/csi-driver-nfs
+    version: 4.9.0

@@ -1,19 +1,26 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: 
+  name: homepage-ingress-certificate
+spec:
+  secretName: homepage-certificate-secret
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - home.phcristian.net
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: homepage
   labels:
     app.kubernetes.io/name: homepage
-  annotations:
-    gethomepage.dev/description: Dynamically Detected Homepage
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Cluster Management
-    gethomepage.dev/icon: homepage.png
-    gethomepage.dev/name: Homepage
 spec:
-  ingressClassName: nginx-internal
+  ingressClassName: traefik-internal
   rules:
-  - host: dashboard.home
+  - host: home.phcristian.net
     http:
       paths:
       - path: '/'
@@ -23,8 +30,21 @@ spec:
             name: homepage
             port:
               number: 3000
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage
+  labels:
+    app: homepage
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`home.phcristian.net`)
+    kind: Rule
+    services:
+    - name: homepage
+      port: 3000
   tls:
-  - hosts:
-    - dashboard.home
-    secretName: homepage-ingress-lets-encrypt
-
+    secretName: homepage-ingress-secret

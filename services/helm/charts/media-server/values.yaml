@@ -1,10 +1,11 @@
 global:
-  host: media.home
-  puid: 5313
-  pgid: 5313
-  ingressClassName: nginx-internal
+  host: phcristian.net
+  puid: 1000
+  pgid: 1000
+  ingressClassName: traefik-internal
 
 plex:
+  claim: "claim-4Wk337BRZgSVv6YChNCR"
   ingress:
     suffix: plex
     annotations: 
@@ -13,7 +14,7 @@ plex:
       gethomepage.dev/icon: plex.png
       gethomepage.dev/name: Plex
     tls:
-      secretName: ""
+      secretName: plex-certificate-secret
   loadBalancerIP: 10.23.1.249
 
 sonarr:
@@ -25,7 +26,7 @@ sonarr:
       gethomepage.dev/icon: sonarr.png
       gethomepage.dev/name: Sonarr
     tls:
-      secretName: ""
+      secretName: sonarr-certificate-secret
   loadBalancerIP: ""
 
 radarr:
@@ -37,7 +38,7 @@ radarr:
       gethomepage.dev/icon: radarr.png
       gethomepage.dev/name: Radarr
     tls:
-      secretName: ""
+      secretName: radarr-certificate-secret
   loadBalancerIP: ""
 
 prowlarr:
@@ -49,7 +50,7 @@ prowlarr:
       gethomepage.dev/icon: prowlarr.png
       gethomepage.dev/name: Prowlarr
     tls:
-      secretName: ""
+      secretName: prowlarr-certificate-secret
   loadBalancerIP: ""
 
 transmission:
@@ -61,6 +62,6 @@ transmission:
       gethomepage.dev/icon: transmission.png
       gethomepage.dev/name: Transmission
     tls:
-      secretName: ""
+      secretName: transmission-certificate-secret
   loadBalancerIP: ""
 

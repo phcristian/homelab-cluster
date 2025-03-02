@@ -1,0 +1,154 @@
+---
+### Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+  labels:
+    {{- include "media-server.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "media-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "media-server.selectorLabels" . | nindent 8 }}
+        app: radarr
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            runAsUser: {{ .Values.global.puid }}
+            runAsGroup: {{ .Values.global.pgid }}
+            fsGroup: {{ .Values.global.pgid }}
+          env:
+          - name: PGID
+            value: "{{ .Values.global.pgid }}"
+          - name: PUID
+            value: "{{ .Values.global.puid }}"
+          image: docker.io/linuxserver/radarr
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: "/ping"
+              port: 7878
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 20
+          ports:
+            - name: radarr
+              containerPort: 7878
+              protocol: TCP
+          volumeMounts:
+          - name: config-volume
+            mountPath: /config
+            subPath: config/radarr
+          - name: media-volume-2
+            mountPath: /data/vol2
+            subPath: Movies
+          - name: media-volume-3
+            mountPath: /data/vol3
+            subPath: Movies
+          - name: media-volume-4
+            mountPath: /data/vol4
+            subPath: Movies
+          - name: media-volume-5
+            mountPath: /data/vol5
+            subPath: Movies
+          - name: media-volume-6
+            mountPath: /downloads
+            subPath: Movies
+      volumes:
+        - name: config-volume
+          persistentVolumeClaim:
+            claimName: config-pvc
+        - name: media-volume-2
+          hostPath:
+            path: /mnt/syno/vol2
+        - name: media-volume-3
+          hostPath:
+            path: /mnt/syno/vol3
+        - name: media-volume-4
+          hostPath:
+            path: /mnt/syno/vol4
+        - name: media-volume-5
+          hostPath:
+            path: /mnt/syno/vol5
+        - name: media-volume-6
+          hostPath:
+            path: /mnt/syno/vol6
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "kubernetes.io/hostname"
+        whenUnsatisfiable: "ScheduleAnyway"
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: {{ .Chart.Name }}
+---
+### Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr
+  labels:
+    {{- include "media-server.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7878
+      targetPort: 7878
+      protocol: TCP
+      name: radarr
+  selector:
+    app: radarr
+---
+### Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radarr
+  labels:
+    {{- include "media-server.labels" . | nindent 4 }}
+  {{- with .Values.radarr.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.global.ingressClassName }}
+  rules:
+  - host: {{ .Values.radarr.ingress.suffix }}.{{ .Values.global.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: radarr
+            port:
+              number: 7878
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radarr
+  labels:
+    app: radarr
+    {{- include "media-server.labels" . | nindent 4}}
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`{{ .Values.radarr.ingress.suffix }}.{{ .Values.global.host }}`)
+    kind: Rule
+    services:
+    - name: radarr
+      port: 7878
+  tls:
+    secretName: {{ .Values.radarr.ingress.tls.secretName }}
+
+
+
