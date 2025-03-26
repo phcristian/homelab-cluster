@@ -60,8 +60,11 @@ spec:
             mountPath: /data/vol5
             subPath: Movies
           - name: media-volume-6
-            mountPath: /downloads
-            subPath: Movies
+            mountPath: /downloads/Torrent
+            subPath: Torrent/Movies
+          - name: media-volume-6
+            mountPath: /downloads/Usenet
+            subPath: Usenet/complete
       volumes:
         - name: config-volume
           persistentVolumeClaim:

@@ -47,5 +47,18 @@ spec:
   dnsNames:
     - {{ .Values.prowlarr.ingress.suffix }}.{{ .Values.global.host }}
 ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: 
+  name: sabnzbd-ingress-certificate
+spec:
+  secretName: {{ .Values.sabnzbd.ingress.tls.secretName }}
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.sabnzbd.ingress.suffix }}.{{ .Values.global.host }}
+---
+
 
 

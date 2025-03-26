@@ -5,7 +5,7 @@ global:
   ingressClassName: traefik-internal
 
 plex:
-  claim: "claim-4Wk337BRZgSVv6YChNCR"
+  claim: ""
   ingress:
     suffix: plex
     annotations: 
@@ -27,7 +27,6 @@ sonarr:
       gethomepage.dev/name: Sonarr
     tls:
       secretName: sonarr-certificate-secret
-  loadBalancerIP: ""
 
 radarr:
   ingress:
@@ -51,17 +50,15 @@ prowlarr:
       gethomepage.dev/name: Prowlarr
     tls:
       secretName: prowlarr-certificate-secret
-  loadBalancerIP: ""
 
-transmission:
+sabnzbd:
   ingress:
-    suffix: transmission
+    suffix: sabnzbd
     annotations: 
       gethomepage.dev/enabled: "true"
       gethomepage.dev/group: Media
-      gethomepage.dev/icon: transmission.png
-      gethomepage.dev/name: Transmission
+      gethomepage.dev/icon: sabnzdb.png
+      gethomepage.dev/name: Sabnzbd
     tls:
-      secretName: transmission-certificate-secret
-  loadBalancerIP: ""
+      secretName: sabnzbd-certificate-secret
 
